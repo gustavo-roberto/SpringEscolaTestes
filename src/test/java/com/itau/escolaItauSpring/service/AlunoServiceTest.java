@@ -2,7 +2,6 @@ package com.itau.escolaItauSpring.service;
 
 import com.itau.escolaItauSpring.config.mapper.AlunoMapper;
 import com.itau.escolaItauSpring.dto.request.AlunoRequest;
-import com.itau.escolaItauSpring.dto.request.CursoRequest;
 import com.itau.escolaItauSpring.dto.response.AlunoResponse;
 import com.itau.escolaItauSpring.exception.ItemNaoExistenteException;
 import com.itau.escolaItauSpring.model.Aluno;
@@ -48,11 +47,11 @@ public class AlunoServiceTest {
         novoAluno.setId(uuid);
         novoAluno.setAtivado(false);
 
-        when(alunoRepository.localizar(any())).thenReturn(novoAluno);
+        when(alunoRepository.localizar(uuid)).thenReturn(novoAluno);
         when(alunoRepository.alterar(uuid, novoAluno)).thenReturn(novoAluno);
 
         alunoService.ativar(uuid);
-        verify(alunoRepository, times(2)).alterar(any(), any());
+        verify(alunoRepository, times(1)).alterar(any(), any());
         assertTrue(novoAluno.getAtivado());
     }
 
