@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +34,7 @@ public class AlunoServiceTest {
     AlunoRepository alunoRepository;
 
     @Test
-    void adicionarAlunoTeste() {
+    void adicionarTeste() {
         Mockito.when(alunoMapper.toModel(ArgumentMatchers.any(AlunoRequest.class))).thenReturn(new Aluno());
         Mockito.when(alunoMapper.toResponse(ArgumentMatchers.any(Aluno.class))).thenReturn(new AlunoResponse());
         Mockito.when(alunoRepository.adicionar(ArgumentMatchers.any(Aluno.class))).thenReturn(new Aluno());
@@ -41,7 +42,7 @@ public class AlunoServiceTest {
     }
 
     @Test
-    void ativarAlunoTeste() throws ItemNaoExistenteException {
+    void ativarTeste() throws ItemNaoExistenteException {
         UUID uuid = UUID.randomUUID();
         Aluno novoAluno = new Aluno();
         novoAluno.setId(uuid);
@@ -54,6 +55,42 @@ public class AlunoServiceTest {
         verify(alunoRepository, times(1)).alterar(any(), any());
         assertTrue(novoAluno.getAtivado());
     }
+
+    @Test
+    void desativarTeste() throws ItemNaoExistenteException {
+        UUID uuid = UUID.randomUUID();
+        Aluno novoAluno = new Aluno();
+        novoAluno.setId(uuid);
+        novoAluno.setAtivado(true);
+
+        when(alunoRepository.localizar(uuid)).thenReturn(novoAluno);
+        when(alunoRepository.alterar(uuid, novoAluno)).thenReturn(novoAluno);
+        alunoService.desativar(uuid);
+        assertFalse(novoAluno.getAtivado());
+        verify(alunoRepository, times(1)).alterar(uuid, novoAluno);
+    }
+
+    @Test
+    void listarTeste() {
+
+        List<Aluno> listaAlunos = List.of(new Aluno(), new Aluno());
+        when(alunoRepository.listar()).thenReturn(listaAlunos);
+        when(alunoMapper.mapAluno(listaAlunos)).thenReturn(List.of(new AlunoResponse(), new AlunoResponse()));
+
+        assertEquals(2, alunoService.listar().size());
+    }
+
+    @Test
+    void localizarTeste() throws ItemNaoExistenteException {
+        UUID uuid = UUID.randomUUID();
+        Aluno alunoEsperado = new Aluno();
+        alunoEsperado.setId(uuid);
+
+        when(alunoRepository.localizar(uuid)).thenReturn(alunoEsperado);
+        when(alunoMapper.toResponse(alunoEsperado)).thenReturn(new AlunoResponse());
+        assertNotNull(alunoService.localizar(uuid));
+    }
+
 
     private AlunoRequest buildAlunoRequest() {
         return AlunoRequest.builder()
